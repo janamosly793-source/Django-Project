@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Scores — Memory Match</title>
+    <link rel="stylesheet" href="{% static 'game/style.css' %}">
+</head>
+<body>
+    <main class="wrap">
+        <header>
+            <h1>High Scores</h1>
+            <p class="subtitle">Fewest moves and fastest time win.</p>
+        </header>
+
+        <table class="scores">
+            <thead>
+                <tr><th>#</th><th>Player</th><th>Moves</th><th>Time</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ score.player }}</td>
+                    <td>{{ score.moves }}</td>
+                    <td>{{ score.seconds }}s</td>
+                    <td>{{ score.created_at|date:"M j, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">No scores yet — go play!</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <footer><a href="{% url 'game:board' %}">Back to game</a></footer>
+    </main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match</title>
+    <link rel="stylesheet" href="{% static 'game/style.css' %}">
+</head>
+<body>
+    <main class="wrap">
+        <header>
+            <h1>Memory Match</h1>
+            <p class="subtitle">Flip two cards at a time and match all pairs.</p>
+        </header>
+
+        <section class="stats">
+            <div class="stat"><span class="label">Moves</span><span id="moves">0</span></div>
+            <div class="stat"><span class="label">Pairs</span><span id="pairs">0</span></div>
+            <div class="stat"><span class="label">Time</span><span id="timer">0:00</span></div>
+            <button id="restart" class="btn">Restart</button>
+        </section>
+
+        <section id="board" class="board"></section>
+
+        <p class="best">
+            {% if best %}Best score: <strong>{{ best.player }}</strong> — {{ best.moves }} moves in {{ best.seconds }}s{% else %}No scores yet. Be the first!{% endif %}
+        </p>
+
+        <div id="win-modal" class="modal hidden">
+            <div class="modal-box">
+                <h2>You win!</h2>
+                <p>Finished in <strong id="win-moves">0</strong> moves and <strong id="win-time">0:00</strong>.</p>
+                <form method="post" action="{% url 'game:save_score' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="moves" id="win-moves-input">
+                    <input type="hidden" name="seconds" id="win-seconds-input">
+                    <label for="player">Your name</label>
+                    <input type="text" name="player" id="player" maxlength="50" placeholder="Anonymous">
+                    <div class="modal-actions">
+                        <button type="submit" class="btn">Save score</button>
+                        <a href="{% url 'game:high_scores' %}" class="btn ghost">High scores</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer><a href="{% url 'game:high_scores' %}">High scores</a></footer>
+    </main>
+    <script src="{% static 'game/memory.js' %}"></script>
+</body>
+</html>
