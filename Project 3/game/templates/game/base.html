@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cake Decoration{% endblock %} | Cakery</title>
+    <style>
+        :root {
+            --pink: #f8b6c9;
+            --pink-dark: #e88aa5;
+            --cream: #fff8f0;
+            --choco: #7b4a2d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ffe3ec, #fff8f0);
+            min-height: 100vh;
+            color: #5a3a22;
+        }
+        nav {
+            background: var(--choco);
+            color: #fff;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav a { color: #fff; text-decoration: none; margin-left: 16px; font-weight: 600; }
+        nav a:hover { color: var(--pink); }
+        .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--pink);
+            color: #5a3a22;
+            border: none;
+            border-radius: 24px;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover { background: var(--pink-dark); color: #fff; }
+        .btn-dark { background: var(--choco); color: #fff; }
+        .btn-dark:hover { background: #5a3a22; }
+        .option {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            border: 3px solid #eee;
+            border-radius: 12px;
+            padding: 10px;
+            margin: 6px;
+            cursor: pointer;
+            background: #fff;
+            min-width: 90px;
+        }
+        .option.selected { border-color: var(--pink-dark); background: #ffeef4; }
+        .option:hover { border-color: var(--pink); }
+        h1, h2 { margin-bottom: 12px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <strong>🍰 Cakery</strong>
+        <div>
+            <a href="{% url 'menu' %}">Menu</a>
+            <a href="{% url 'play' %}">Play</a>
+            <a href="{% url 'scores' %}">High Scores</a>
+        </div>
+    </nav>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

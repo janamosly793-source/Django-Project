@@ -1,0 +1,154 @@
+{% extends "game/base.html" %}
+{% block title %}Play{% endblock %}
+{% block extra_head %}
+<style>
+    .order-card { background: #fff7ec; border: 3px dashed var(--choco); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+    .order-item { display: inline-flex; align-items: center; gap: 8px; background: #fff; border-radius: 24px; padding: 6px 14px; margin: 4px; font-weight: 600; border: 2px solid #f0d9c4; }
+    .cake-scene { display: flex; flex-direction: column; align-items: center; padding: 16px 0 8px; }
+    .cake-top {
+        width: 280px; height: 56px; border-radius: 14px 14px 0 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 26px; gap: 6px; border: 3px solid rgba(0,0,0,0.12);
+    }
+    .cake-drip { width: 280px; height: 0; position: relative; }
+    .cake-drip::after {
+        content: ""; position: absolute; left: 0; top: -10px;
+        width: 280px; height: 20px; border-radius: 0 0 50% 50%;
+        background: inherit;
+    }
+    .cake-body { width: 280px; height: 110px; border-radius: 0 0 12px 12px; border: 3px solid rgba(0,0,0,0.12); }
+    .plate { width: 320px; height: 18px; border-radius: 50%; background: #e6e6e6; margin-top: -6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    .timer { font-size: 22px; font-weight: 800; color: var(--choco); text-align: center; margin: 12px 0; }
+    .timer.low { color: #d64545; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
+    .topping-btn { font-size: 30px; padding: 8px 14px; border-radius: 12px; border: 2px solid #eee; background: #fff; cursor: pointer; }
+    .topping-btn:hover { border-color: var(--pink); }
+    .decorated-tag { background: #e8fff0; border: 2px solid #7ed9a3; }
+    .picker { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+    .swatch { width: 48px; height: 48px; border-radius: 50%; border: 3px solid #eee; cursor: pointer; }
+    .swatch.selected { border-color: var(--choco); box-shadow: 0 0 0 3px var(--pink); }
+    .swatch-label { display: block; text-align: center; font-size: 12px; font-weight: 600; margin-top: 4px; }
+</style>
+{% endblock %}
+{% block content %}
+{% if error %}
+<div class="card">{{ error }}<br><br><a class="btn" href="{% url 'menu' %}">Back to menu</a></div>
+{% else %}
+
+<div class="card order-card">
+    <h2>📋 Customer Order</h2>
+    <div>
+        <span class="order-item">🍥 Base:
+            {% for b in bases %}{% if b.id == order.base_id %}{{ b.name }}{% endif %}{% endfor %}
+        </span>
+        <span class="order-item">🍦 Frosting:
+            {% for f in frostings %}{% if f.id == order.frosting_id %}{{ f.name }}{% endif %}{% endfor %}
+        </span>
+        {% for t in needed_toppings %}
+            <span class="order-item">{{ t.emoji }} {{ t.name }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card" style="text-align:center;">
+    <div class="timer" id="timer">60</div>
+    <div class="cake-scene">
+        <div class="cake-top" id="cake-top">
+            {% for tid in decorated %}{% for t in toppings %}{% if t.id == tid %}<span>{{ t.emoji }}</span>{% endif %}{% endfor %}{% endfor %}
+        </div>
+        <div class="cake-drip" id="cake-drip"></div>
+        <div class="cake-body" id="cake-body"></div>
+        <div class="plate"></div>
+    </div>
+</div>
+
+<form method="post" id="play-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="action-input" value="finish">
+    <input type="hidden" name="topping_id" id="topping-input" value="0">
+    <input type="hidden" name="base_id" id="base-input" value="0">
+    <input type="hidden" name="frosting_id" id="frosting-input" value="0">
+    <input type="hidden" name="time_taken" id="time-input" value="60">
+
+    <div class="card">
+        <h2>🍥 Choose base</h2>
+        <div class="picker">
+            {% for b in bases %}
+            <div class="option" data-type="base" data-id="{{ b.id }}" data-color="{{ b.color }}">
+                <span class="swatch" style="background: {{ b.color }};"></span>
+                <span class="swatch-label">{{ b.name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🍦 Choose frosting</h2>
+        <div class="picker">
+            {% for f in frostings %}
+            <div class="option" data-type="frosting" data-id="{{ f.id }}" data-color="{{ f.color }}">
+                <span class="swatch" style="background: {{ f.color }};"></span>
+                <span class="swatch-label">{{ f.name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🎀 Add toppings</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            {% for t in toppings %}
+            <button type="submit" class="topping-btn {% if t.id in decorated %}decorated-tag{% endif %}"
+                    onclick="setTopping({{ t.id }})">
+                {{ t.emoji }}
+            </button>
+            {% endfor %}
+        </div>
+        <p style="margin-top:10px; font-size:14px;">Tap a topping to place it on the cake. Only add what's on the order!</p>
+    </div>
+
+    <div style="text-align:center; margin-bottom: 24px;">
+        <button type="submit" class="btn btn-dark" style="font-size:18px;">✅ Finish the cake</button>
+    </div>
+</form>
+
+<script>
+    const TIME_LIMIT = {{ time_limit }};
+    let seconds = TIME_LIMIT;
+    const timerEl = document.getElementById('timer');
+
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const type = opt.dataset.type;
+            document.querySelectorAll(`.option[data-type="${type}"]`).forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            const color = opt.dataset.color;
+            if (type === 'base') {
+                document.getElementById('base-input').value = opt.dataset.id;
+                document.getElementById('cake-body').style.background = color;
+            } else {
+                document.getElementById('frosting-input').value = opt.dataset.id;
+                document.getElementById('cake-drip').style.background = color;
+                document.getElementById('cake-top').style.background = color;
+            }
+        });
+    });
+
+    const tick = setInterval(() => {
+        seconds -= 1;
+        timerEl.textContent = seconds;
+        document.getElementById('time-input').value = seconds;
+        if (seconds <= 10) timerEl.classList.add('low');
+        if (seconds <= 0) {
+            clearInterval(tick);
+            document.getElementById('play-form').submit();
+        }
+    }, 1000);
+
+    function setTopping(id) {
+        document.getElementById('topping-input').value = id;
+        document.getElementById('action-input').value = 'add_topping';
+    }
+</script>
+{% endif %}
+{% endblock %}

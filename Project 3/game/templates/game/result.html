@@ -1,0 +1,30 @@
+{% extends "game/base.html" %}
+{% block title %}Result{% endblock %}
+{% block content %}
+<div class="card" style="text-align:center; padding: 40px 24px;">
+    <h1>{% if result.score >= 80 %}🌟 Amazing cake!{% elif result.score >= 50 %}🍰 Nice job!{% else %}😅 Keep practicing!{% endif %}</h1>
+    <p style="font-size: 48px; font-weight: 800; color: var(--pink-dark); margin: 16px 0;">{{ result.score }} pts</p>
+    <div style="text-align:left; display:inline-block; background:#fff7ec; border-radius:12px; padding:16px 24px; min-width: 320px;">
+        <ul style="line-height: 1.9;">
+            {% for d in result.details %}<li>{{ d }}</li>{% endfor %}
+        </ul>
+        <p style="margin-top:8px;">⏱️ Time taken: {{ result.time_taken }}s</p>
+    </div>
+</div>
+
+<div class="card" style="text-align:center;">
+    <h2>🏆 Save your score</h2>
+    {% if name %}
+    <p style="color:#d64545;">Please enter a name to save.</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="name" maxlength="50" placeholder="Your name"
+               style="padding:10px 16px; border-radius:24px; border:2px solid #f0d9c4; font-size:16px;" required>
+        <button type="submit" class="btn btn-dark">Save</button>
+    </form>
+    <br>
+    <a class="btn" href="{% url 'play' %}">Play again</a>
+    <a class="btn" href="{% url 'menu' %}">Menu</a>
+</div>
+{% endblock %}

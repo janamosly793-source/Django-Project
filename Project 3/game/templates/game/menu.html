@@ -1,0 +1,24 @@
+{% extends "game/base.html" %}
+{% block title %}Menu{% endblock %}
+{% block content %}
+<div class="card" style="text-align:center; padding: 48px 24px;">
+    <h1>🍰 Cake Decoration</h1>
+    <p style="font-size: 18px; margin-bottom: 24px;">
+        A customer walks into your bakery with an order. Decorate the cake to match — fast!
+    </p>
+    <a class="btn btn-dark" href="{% url 'play' %}" style="font-size: 20px; padding: 14px 40px;">Start Decorating</a>
+    <br><br>
+    <a class="btn" href="{% url 'scores' %}">View High Scores</a>
+</div>
+<div class="card">
+    <h2>📜 How to play</h2>
+    <ul style="line-height: 1.9; padding-left: 20px;">
+        <li>Read the customer's order card (base, frosting, toppings).</li>
+        <li>Choose the correct base and frosting color.</li>
+        <li>Tap toppings to place them on the cake — only the ones on the order!</li>
+        <li>Finish before the 60-second timer runs out.</li>
+        <li>Correct base and frosting: 30 pts each. Correct topping: 10-15 pts. Wrong topping: -5 pts.</li>
+        <li>Time bonus: up to 60 extra points for finishing fast.</li>
+    </ul>
+</div>
+{% endblock %}
